@@ -1,303 +1,100 @@
---// Astolfo Test GUI v4 - GUI dijamin muncul
+-- Loader.lua
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
+-- Buat Window
+local Window = OrionLib:MakeWindow({
+    Name = "Astolfo | Beta GUI",
+    HidePremium = false,
+    SaveConfig = false,
+    ConfigFolder = "AstolfoTest"
+})
 
--- Services
-local UserInputService = game:GetService("UserInputService")
-local VirtualUser = game:GetService("VirtualUser")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- Buat Tab
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
 -- Variables
 local autoClick = false
 local clickDelay = 0.2
-local minDelay, maxDelay = 0.05, 5
 local infJump = false
 
--- Cari parent GUI yang aman
-local function getSafeParent()
-    local suc, res = pcall(function() return gethui() end)
-    if suc and res then
-        return res
-    end
-    if game:GetService("CoreGui") then
-        return game:GetService("CoreGui")
-    end
-    return LocalPlayer:WaitForChild("PlayerGui")
-end
-
--- GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AstolfoGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = getSafeParent()
-
-local Frame = Instance.new("Frame")
-Frame.Name = "MainFrame"
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.Size = UDim2.new(0, 320, 0, 260)
-Frame.Position = UDim2.new(0.5, -160, 0.5, -130)
-
--- Title
-local Title = Instance.new("TextLabel", Frame)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Title.Text = "Astolfo | Test GUI v4"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
-
--- Minimize Button
-local MinimizeBtn = Instance.new("TextButton", Frame)
-MinimizeBtn.Size = UDim2.new(0, 150, 0, 25)
-MinimizeBtn.Position = UDim2.new(0, 10, 0, 40)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.Text = "Minimize"
-
-local minimized = false
-MinimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Frame.Size = UDim2.new(0, 320, 0, 30)
-        MinimizeBtn.Text = "Show"
-    else
-        Frame.Size = UDim2.new(0, 320, 0, 260)
-        MinimizeBtn.Text = "Minimize"
-    end
-end)
-
--- Close Button
-local CloseBtn = Instance.new("TextButton", Frame)
-CloseBtn.Size = UDim2.new(0, 150, 0, 25)
-CloseBtn.Position = UDim2.new(0, 160, 0, 40)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Text = "Close GUI"
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
--- Auto Click Button
-local AutoClickBtn = Instance.new("TextButton", Frame)
-AutoClickBtn.Size = UDim2.new(0, 300, 0, 30)
-AutoClickBtn.Position = UDim2.new(0, 10, 0, 80)
-AutoClickBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-AutoClickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoClickBtn.Text = "Auto Click: OFF"
-
-AutoClickBtn.MouseButton1Click:Connect(function()
-    autoClick = not autoClick
-    AutoClickBtn.Text = "Auto Click: " .. (autoClick and "ON" or "OFF")
-    if autoClick then
-        task.spawn(function()
-            while autoClick do
-                VirtualUser:ClickButton1(Vector2.new())
-                task.wait(clickDelay)
-            end
-        end)
-    end
-end)
-
--- Delay Box
-local DelayBox = Instance.new("TextBox", Frame)
-DelayBox.Size = UDim2.new(0, 300, 0, 25)
-DelayBox.Position = UDim2.new(0, 10, 0, 120)
-DelayBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
-DelayBox.ClearTextOnFocus = true
-
-DelayBox.FocusLost:Connect(function()
-    local num = tonumber(DelayBox.Text)
-    if num and num >= minDelay and num <= maxDelay then
-        clickDelay = num
-        DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
-    else
-        DelayBox.Text = "Delay min " .. minDelay .. " - max " .. maxDelay .. " (Now: " .. clickDelay .. ")"
-    end
-end)
-
--- Infinite Jump Button
-local InfJumpBtn = Instance.new("TextButton", Frame)
-InfJumpBtn.Size = UDim2.new(0, 300, 0, 30)
-InfJumpBtn.Position = UDim2.new(0, 10, 0, 160)
-InfJumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-InfJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfJumpBtn.Text = "Infinite Jump: OFF"
-
-InfJumpBtn.MouseButton1Click:Connect(function()
-    infJump = not infJump
-    InfJumpBtn.Text = "Infinite Jump: " .. (infJump and "ON" or "OFF")
-end)
-
-UserInputService.JumpRequest:Connect(function()
-    if infJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
--- Fix My FPS Button
-local FixFpsBtn = Instance.new("TextButton", Frame)
-FixFpsBtn.Size = UDim2.new(0, 300, 0, 30)
-FixFpsBtn.Position = UDim2.new(0, 10, 0, 200)
-FixFpsBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-FixFpsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FixFpsBtn.Text = "Fix My FPS"
-
-FixFpsBtn.MouseButton1Click:Connect(function()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        elseif v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
-            v.Material = Enum.Material.Plastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = 1
+-- Auto Click Toggle
+MainTab:AddToggle({
+    Name = "Auto Click",
+    Default = false,
+    Callback = function(Value)
+        autoClick = Value
+        if autoClick then
+            task.spawn(function()
+                while autoClick do
+                    game:GetService("VirtualUser"):ClickButton1(Vector2.new())
+                    task.wait(clickDelay)
+                end
+            end)
         end
     end
-    game.Lighting.GlobalShadows = false
-    game.Lighting.FogEnd = 9e9
-    FixFpsBtn.Text = "FPS Fixed ✅"
-end)
+})
 
--- Draggable Frame
-Frame.Active = true
-Frame.Draggable = trueTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
+-- Auto Click Delay Slider
+MainTab:AddSlider({
+    Name = "Auto Click Delay",
+    Min = 0.05,  -- recommended minimum
+    Max = 2,     -- recommended maximum
+    Default = 0.2,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 0.05,
+    ValueName = "Seconds",
+    Callback = function(Value)
+        clickDelay = Value
+    end
+})
 
--- Minimize Button
-local MinimizeBtn = Instance.new("TextButton", Frame)
-MinimizeBtn.Size = UDim2.new(0, 150, 0, 25)
-MinimizeBtn.Position = UDim2.new(0, 10, 0, 40)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.Text = "Minimize"
+-- Infinite Jump
+MainTab:AddToggle({
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        infJump = Value
+    end
+})
 
-local minimized = false
-MinimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Frame.Size = UDim2.new(0, 320, 0, 30)
-        MinimizeBtn.Text = "Show"
-    else
-        Frame.Size = UDim2.new(0, 320, 0, 260)
-        MinimizeBtn.Text = "Minimize"
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
 end)
 
--- Close Button
-local CloseBtn = Instance.new("TextButton", Frame)
-CloseBtn.Size = UDim2.new(0, 150, 0, 25)
-CloseBtn.Position = UDim2.new(0, 160, 0, 40)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Text = "Close GUI"
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
--- Auto Click Button
-local AutoClickBtn = Instance.new("TextButton", Frame)
-AutoClickBtn.Size = UDim2.new(0, 300, 0, 30)
-AutoClickBtn.Position = UDim2.new(0, 10, 0, 80)
-AutoClickBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-AutoClickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoClickBtn.Text = "Auto Click: OFF"
-
-AutoClickBtn.MouseButton1Click:Connect(function()
-    autoClick = not autoClick
-    AutoClickBtn.Text = "Auto Click: " .. (autoClick and "ON" or "OFF")
-    if autoClick then
-        task.spawn(function()
-            while autoClick do
-                VirtualUser:ClickButton1(Vector2.new())
-                task.wait(clickDelay)
+-- Fix FPS Button
+MainTab:AddButton({
+    Name = "Fix My FPS",
+    Callback = function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            elseif v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
             end
-        end)
-    end
-end)
-
--- Delay Box
-local DelayBox = Instance.new("TextBox", Frame)
-DelayBox.Size = UDim2.new(0, 300, 0, 25)
-DelayBox.Position = UDim2.new(0, 10, 0, 120)
-DelayBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
-DelayBox.ClearTextOnFocus = true
-
-DelayBox.FocusLost:Connect(function()
-    local num = tonumber(DelayBox.Text)
-    if num and num >= minDelay and num <= maxDelay then
-        clickDelay = num
-        DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
-    else
-        DelayBox.Text = "Delay harus " .. minDelay .. " - " .. maxDelay .. " (Now: " .. clickDelay .. ")"
-    end
-end)
-
--- Infinite Jump Button
-local InfJumpBtn = Instance.new("TextButton", Frame)
-InfJumpBtn.Size = UDim2.new(0, 300, 0, 30)
-InfJumpBtn.Position = UDim2.new(0, 10, 0, 160)
-InfJumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-InfJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfJumpBtn.Text = "Infinite Jump: OFF"
-
-InfJumpBtn.MouseButton1Click:Connect(function()
-    infJump = not infJump
-    InfJumpBtn.Text = "Infinite Jump: " .. (infJump and "ON" or "OFF")
-end)
-
-UserInputService.JumpRequest:Connect(function()
-    if infJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
--- Fix My FPS Button
-local FixFpsBtn = Instance.new("TextButton", Frame)
-FixFpsBtn.Size = UDim2.new(0, 300, 0, 30)
-FixFpsBtn.Position = UDim2.new(0, 10, 0, 200)
-FixFpsBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-FixFpsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FixFpsBtn.Text = "Fix My FPS"
-
-FixFpsBtn.MouseButton1Click:Connect(function()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        elseif v:IsA("BasePart") and v.Material ~= Enum.Material.Air then
-            v.Material = Enum.Material.Plastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = 1
         end
+        game.Lighting.GlobalShadows = false
+        game.Lighting.FogEnd = 9e9
+        OrionLib:MakeNotification({
+            Name = "FPS Booster",
+            Content = "FPS berhasil di-fix ✅",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
     end
-    game.Lighting.GlobalShadows = false
-    game.Lighting.FogEnd = 9e9
-    FixFpsBtn.Text = "FPS Fixed ✅"
-end)
+})
 
--- Draggable Frame
-Frame.Active = true
-Frame.Draggable = trueFrame.Size = UDim2.new(0, 320, 0, 260)
-Frame.Position = UDim2.new(0.5, -160, 0.5, -130)
-
--- Title
-Title.Parent = Frame
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Title.Text = "Astolfo | Test GUI v2"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
+-- Init Orion
+OrionLib:Init()t = Enum.Font.SourceSansBold
 Title.TextSize = 18
 
 -- Minimize Button
