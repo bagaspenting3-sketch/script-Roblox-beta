@@ -1,40 +1,26 @@
--- Hapus UI lama kalau ad
+-- Loader.lua (test minimal UI)
 if game.CoreGui:FindFirstChild("MySimpleUI") then
     game.CoreGui.MySimpleUI:Destroy()
 end
 
--- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MySimpleUI"
 ScreenGui.Parent = game.CoreGui
 
--- Frame Utama
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 350, 0, 300)
-Frame.Position = UDim2.new(0.5, -175, 0.5, -150)
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.Active = true
-Frame.Draggable = true
 Frame.Parent = ScreenGui
 
--- Judul
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Title.Text = "My Custom UI"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 20
-Title.Parent = Frame
-
--- Variabel
-local autoClick = false
-local autoClickSpeed = 0.5
-local infJump = false
-
-----------------------------------------------------
--- Tombol AutoClick Toggle
-----------------------------------------------------
+local Label = Instance.new("TextLabel")
+Label.Size = UDim2.new(1, 0, 1, 0)
+Label.BackgroundTransparency = 1
+Label.Text = "LOADER LUA OK ✅"
+Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+Label.Font = Enum.Font.SourceSansBold
+Label.TextSize = 20
+Label.Parent = Frame----------------------------------------------------
 local AutoClickBtn = Instance.new("TextButton")
 AutoClickBtn.Size = UDim2.new(0, 300, 0, 40)
 AutoClickBtn.Position = UDim2.new(0.5, -150, 0, 60)
