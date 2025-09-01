@@ -1,4 +1,4 @@
--- Loader.lua (test minimal UI)
+-- Loader.lua (test minimal aUI)
 if game.CoreGui:FindFirstChild("MySimpleUI") then
     game.CoreGui.MySimpleUI:Destroy()
 end
