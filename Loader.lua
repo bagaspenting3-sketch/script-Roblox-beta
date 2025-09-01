@@ -1,28 +1,29 @@
--- Loader.lua
+-- Load OrionLib
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
 -- Buat Window
 local Window = OrionLib:MakeWindow({
-    Name = "Astolfo | Beta GUI",
+    Name = "Astolfo Ware | Test Menu",
     HidePremium = false,
     SaveConfig = false,
-    ConfigFolder = "AstolfoTest"
+    ConfigFolder = "AstolfoWareTest"
 })
 
--- Buat Tab
-local MainTab = Window:MakeTab({
-    Name = "Main",
+-- === TAB MAIN ===
+local Tab = Window:MakeTab({
+    Name = "Main Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- Variables
+-- Variabel fitur
 local autoClick = false
 local clickDelay = 0.2
 local infJump = false
+local fpsBoost = false
 
--- Auto Click Toggle
-MainTab:AddToggle({
+-- === AUTO CLICK ===
+Tab:AddToggle({
     Name = "Auto Click",
     Default = false,
     Callback = function(Value)
@@ -35,6 +36,60 @@ MainTab:AddToggle({
                 end
             end)
         end
+    end
+})
+
+Tab:AddSlider({
+    Name = "Auto Click Speed",
+    Min = 0.05,  -- max speed (cepat)
+    Max = 1,     -- min speed (lambat)
+    Default = 0.2,
+    Increment = 0.05,
+    Callback = function(Value)
+        clickDelay = Value
+    end
+})
+
+-- === INFINITE JUMP ===
+Tab:AddToggle({
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        infJump = Value
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+        game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- === FIX FPS ===
+Tab:AddButton({
+    Name = "Fix My FPS (Potato Mode)",
+    Callback = function()
+        setfpscap(60) -- batasi fps ke 60 biar stabil
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            elseif v:IsA("Explosion") then
+                v.BlastPressure = 0
+                v.BlastRadius = 0
+            elseif v:IsA("Fire") or v:IsA("Smoke") then
+                v.Enabled = false
+            end
+        end
+        OrionLib:MakeNotification({
+            Name = "FPS Boost",
+            Content = "Mode kentang aktif! Partikel dimatiin.",
+            Time = 3
+        })
+    end
+})
+
+-- Init GUI (WAJIB)
+OrionLib:Init()        end
     end
 })
 
