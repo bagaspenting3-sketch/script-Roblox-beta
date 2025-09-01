@@ -1,4 +1,4 @@
--- Hapus UI lama kalau ada
+-- Hapus UI lama kalau ad
 if game.CoreGui:FindFirstChild("MySimpleUI") then
     game.CoreGui.MySimpleUI:Destroy()
 end
