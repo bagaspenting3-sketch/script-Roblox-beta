@@ -1,12 +1,4 @@
---[[ 
-    Simple Test Script with GUI
-    Features:
-    ✅ FPS Counter
-    ✅ Infinite Jump (toggle)
-    ✅ Minimize / Restore Button
-    ✅ Kill GUI Button
-]]
-
+-- Loader.lua
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
@@ -14,27 +6,176 @@ end
 -- Services
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local RS = game:GetService("RunService")
 local Stats = game:GetService("Stats")
+local VirtualUser = game:GetService("VirtualUser")
 
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
--- Vars
+-- Main ScreenGui
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "AstolfoTestUI"
+
+-- Frame utama
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 300)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Active = true
+Frame.Draggable = true
+
+-- Judul
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Astolfo Ware | Test Menu"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundColor3 = Color3.fromRGB(50,50,50)
+
+-- Tombol Minimize
+local Minimize = Instance.new("TextButton", Frame)
+Minimize.Size = UDim2.new(0, 80, 0, 25)
+Minimize.Position = UDim2.new(1, -85, 0, 2)
+Minimize.Text = "Minimize"
+Minimize.TextColor3 = Color3.fromRGB(255,255,255)
+Minimize.BackgroundColor3 = Color3.fromRGB(70,70,70)
+
+-- ================= Fitur =================
+-- Inf Jump
+local InfJumpBtn = Instance.new("TextButton", Frame)
+InfJumpBtn.Size = UDim2.new(0, 280, 0, 30)
+InfJumpBtn.Position = UDim2.new(0, 10, 0, 40)
+InfJumpBtn.Text = "Infinite Jump: OFF"
+InfJumpBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+InfJumpBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
 local infJump = false
-local FPS = 60
-local FrameCounter, FrameTimer = 0, tick()
-local minimized = false
-local connections = {}
+InfJumpBtn.MouseButton1Click:Connect(function()
+    infJump = not infJump
+    InfJumpBtn.Text = "Infinite Jump: " .. (infJump and "ON" or "OFF")
+end)
 
--- GUI Setup
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TestGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game.CoreGui
+UIS.JumpRequest:Connect(function()
+    if infJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
 
--- Main Frame
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 250, 0, 120)
+-- TP Walk
+local TpWalkBtn = Instance.new("TextButton", Frame)
+TpWalkBtn.Size = UDim2.new(0, 280, 0, 30)
+TpWalkBtn.Position = UDim2.new(0, 10, 0, 80)
+TpWalkBtn.Text = "TP Walk: OFF"
+TpWalkBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TpWalkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+local tpWalk = false
+local tpSpeed = 5
+
+TpWalkBtn.MouseButton1Click:Connect(function()
+    tpWalk = not tpWalk
+    TpWalkBtn.Text = "TP Walk: " .. (tpWalk and "ON" or "OFF")
+end)
+
+RS.Heartbeat:Connect(function()
+    if tpWalk and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 0 then
+            LocalPlayer.Character:TranslateBy(LocalPlayer.Character.Humanoid.MoveDirection * tpSpeed/10)
+        end
+    end
+end)
+
+-- Auto Click
+local AutoClickBtn = Instance.new("TextButton", Frame)
+AutoClickBtn.Size = UDim2.new(0, 280, 0, 30)
+AutoClickBtn.Position = UDim2.new(0, 10, 0, 120)
+AutoClickBtn.Text = "Auto Click: OFF"
+AutoClickBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+AutoClickBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+local autoClick = false
+AutoClickBtn.MouseButton1Click:Connect(function()
+    autoClick = not autoClick
+    AutoClickBtn.Text = "Auto Click: " .. (autoClick and "ON" or "OFF")
+    if autoClick then
+        task.spawn(function()
+            while autoClick do
+                VirtualUser:ClickButton1(Vector2.new())
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- Fix FPS
+local FixFpsBtn = Instance.new("TextButton", Frame)
+FixFpsBtn.Size = UDim2.new(0, 280, 0, 30)
+FixFpsBtn.Position = UDim2.new(0, 10, 0, 160)
+FixFpsBtn.Text = "Fix My FPS"
+FixFpsBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+FixFpsBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+FixFpsBtn.MouseButton1Click:Connect(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    workspace.GlobalShadows = false
+    
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.Plastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Enabled = false
+        end
+    end
+    
+    if workspace:FindFirstChildOfClass("Terrain") then
+        workspace.Terrain.WaterWaveSize = 0
+        workspace.Terrain.WaterWaveSpeed = 0
+        workspace.Terrain.WaterReflectance = 0
+        workspace.Terrain.WaterTransparency = 0
+    end
+    
+    game.Lighting.GlobalShadows = false
+    game.Lighting.FogEnd = 9e9
+    
+    FixFpsBtn.Text = "FPS Fixed ✅"
+end)
+
+-- FPS + Ping Display
+local StatsLabel = Instance.new("TextLabel", Frame)
+StatsLabel.Size = UDim2.new(0, 280, 0, 30)
+StatsLabel.Position = UDim2.new(0, 10, 0, 200)
+StatsLabel.TextColor3 = Color3.fromRGB(255,255,255)
+StatsLabel.BackgroundColor3 = Color3.fromRGB(50,50,50)
+StatsLabel.Text = "FPS: ... | Ping: ..."
+
+local FrameCounter, FPS, Timer = 0, 60, tick()
+RS.RenderStepped:Connect(function()
+    FrameCounter += 1
+    if tick() - Timer >= 1 then
+        FPS = FrameCounter
+        FrameCounter = 0
+        Timer = tick()
+    end
+    local Ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    StatsLabel.Text = "FPS: " .. tostring(FPS) .. " | Ping: " .. tostring(Ping).." ms"
+end)
+
+-- ================= Minimize Logic =================
+local Minimized = false
+Minimize.MouseButton1Click:Connect(function()
+    Minimized = not Minimized
+    Frame.Size = Minimized and UDim2.new(0, 300, 0, 30) or UDim2.new(0, 300, 0, 300)
+    for _,v in pairs(Frame:GetChildren()) do
+        if v:IsA("TextButton") or v:IsA("TextLabel") then
+            if v ~= Title and v ~= Minimize then
+                v.Visible = not Minimized
+            end
+        end
+    end
+    Minimize.Text = Minimized and "Show" or "Minimize"
+end)Frame.Size = UDim2.new(0, 250, 0, 120)
 Frame.Position = UDim2.new(0.5, -125, 0.1, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 0
