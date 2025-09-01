@@ -1,28 +1,31 @@
--- Load OrionLib
+-- OrionLib Loader
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
 -- Buat Window
 local Window = OrionLib:MakeWindow({
-    Name = "Astolfo Ware | Test Menu",
+    Name = "My Test Hub",
     HidePremium = false,
     SaveConfig = false,
-    ConfigFolder = "AstolfoWareTest"
+    ConfigFolder = "MyTestHub"
 })
 
--- === TAB MAIN ===
+-- Buat Tab
 local Tab = Window:MakeTab({
     Name = "Main Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- Variabel fitur
+-- =========================
+-- Variabel
+-- =========================
 local autoClick = false
 local clickDelay = 0.2
 local infJump = false
-local fpsBoost = false
 
--- === AUTO CLICK ===
+-- =========================
+-- Auto Click
+-- =========================
 Tab:AddToggle({
     Name = "Auto Click",
     Default = false,
@@ -35,6 +38,67 @@ Tab:AddToggle({
                     task.wait(clickDelay)
                 end
             end)
+        end
+    end
+})
+
+Tab:AddSlider({
+    Name = "Auto Click Speed",
+    Min = 0.05, -- lebih kecil = lebih cepat
+    Max = 1,    -- lebih besar = lebih lambat
+    Default = 0.2,
+    Increment = 0.05,
+    Callback = function(Value)
+        clickDelay = Value
+    end
+})
+
+-- =========================
+-- Infinite Jump
+-- =========================
+Tab:AddToggle({
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        infJump = Value
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+        game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- =========================
+-- Fix My FPS
+-- =========================
+Tab:AddButton({
+    Name = "Fix My FPS (Potato Mode)",
+    Callback = function()
+        setfpscap(60) -- batasi fps ke 60
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            elseif v:IsA("Explosion") then
+                v.BlastPressure = 0
+                v.BlastRadius = 0
+            elseif v:IsA("Fire") or v:IsA("Smoke") then
+                v.Enabled = false
+            end
+        end
+        OrionLib:MakeNotification({
+            Name = "FPS Boost",
+            Content = "Mode kentang aktif, partikel dimatikan.",
+            Time = 3
+        })
+    end
+})
+
+-- =========================
+-- Wajib Init biar UI muncul
+-- =========================
+OrionLib:Init()            end)
         end
     end
 })
