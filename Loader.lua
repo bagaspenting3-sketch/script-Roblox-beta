@@ -1,40 +1,110 @@
--- Loader.lua
+--// Simple GUI with Auto Click
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
 -- Services
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local Stats = game:GetService("Stats")
+local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 
-local LocalPlayer = Players.LocalPlayer
+-- Variables
+local autoClick = false
+local clickDelay = 0.2 -- default
+local minDelay, maxDelay = 0.05, 5
 
--- Main ScreenGui
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "AstolfoTestUI"
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ToggleBtn = Instance.new("TextButton")
+local AutoClickBtn = Instance.new("TextButton")
+local DelayBox = Instance.new("TextBox")
 
--- Frame utama
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 300, 0, 300)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -150)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.Active = true
-Frame.Draggable = true
+-- ScreenGui
+ScreenGui.Name = "TestGUI"
+ScreenGui.Parent = game:GetService("CoreGui")
 
--- Judul
-local Title = Instance.new("TextLabel", Frame)
+-- Frame
+Frame.Name = "MainFrame"
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.Size = UDim2.new(0, 300, 0, 200)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+
+-- Title
+Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "Astolfo Ware | Test Menu"
-Title.TextColor3 = Color3.fromRGB(255,255,255)
-Title.BackgroundColor3 = Color3.fromRGB(50,50,50)
+Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Title.Text = "Astolfo | Test GUI"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
 
--- Tombol Minimize
-local Minimize = Instance.new("TextButton", Frame)
-Minimize.Size = UDim2.new(0, 80, 0, 25)
-Minimize.Position = UDim2.new(1, -85, 0, 2)
+-- Toggle Button (Minimize/Show)
+ToggleBtn.Parent = Frame
+ToggleBtn.Size = UDim2.new(0, 280, 0, 25)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 40)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Text = "Minimize"
+
+local minimized = false
+ToggleBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        Frame.Size = UDim2.new(0, 300, 0, 30)
+        ToggleBtn.Text = "Show"
+    else
+        Frame.Size = UDim2.new(0, 300, 0, 200)
+        ToggleBtn.Text = "Minimize"
+    end
+end)
+
+-- Auto Click Button
+AutoClickBtn.Parent = Frame
+AutoClickBtn.Size = UDim2.new(0, 280, 0, 30)
+AutoClickBtn.Position = UDim2.new(0, 10, 0, 80)
+AutoClickBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+AutoClickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoClickBtn.Text = "Auto Click: OFF"
+
+AutoClickBtn.MouseButton1Click:Connect(function()
+    autoClick = not autoClick
+    AutoClickBtn.Text = "Auto Click: " .. (autoClick and "ON" or "OFF")
+
+    if autoClick then
+        task.spawn(function()
+            while autoClick do
+                VirtualUser:ClickButton1(Vector2.new())
+                task.wait(clickDelay)
+            end
+        end)
+    end
+end)
+
+-- Delay Input
+DelayBox.Parent = Frame
+DelayBox.Size = UDim2.new(0, 280, 0, 25)
+DelayBox.Position = UDim2.new(0, 10, 0, 120)
+DelayBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
+DelayBox.ClearTextOnFocus = true
+
+DelayBox.FocusLost:Connect(function(enterPressed)
+    local num = tonumber(DelayBox.Text)
+    if num and num >= minDelay and num <= maxDelay then
+        clickDelay = num
+        DelayBox.Text = "Delay (detik): " .. tostring(clickDelay)
+    else
+        DelayBox.Text = "Delay harus antara " .. minDelay .. " - " .. maxDelay .. " (Sekarang: " .. clickDelay .. ")"
+    end
+end)
+
+-- Dragging the Frame
+local dragging, dragInput, dragStart, startPos
+Frame.Active = true
+Frame.Draggable = true -- untuk executor modern biasanya workMinimize.Position = UDim2.new(1, -85, 0, 2)
 Minimize.Text = "Minimize"
 Minimize.TextColor3 = Color3.fromRGB(255,255,255)
 Minimize.BackgroundColor3 = Color3.fromRGB(70,70,70)
